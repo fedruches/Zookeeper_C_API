@@ -93,19 +93,19 @@ class Queue
                 * */
                 if (retExists == ZNONODE)
                 {
-                    std::vector<char> data = {0};
+                    std::vector<int> data = {0};
                     std::vector<char> pathBuffer(100);
 
                     //const ACL_vector *openAclUnsafe = ZOO_OPEN_ACL_UNSAFE;
 
                     /*auto retCreate = */zoo_create(zkHandler,
-                               name.c_str(),
-                               data.data(),
-                               1,
-                               &ZOO_OPEN_ACL_UNSAFE,
-                               ZOO_PERSISTENT,
-                               pathBuffer.data(),
-                               100);
+                                                    name_.c_str(),
+                                                    reinterpret_cast<char*>(data.data()),
+                                                    1,
+                                                    &ZOO_OPEN_ACL_UNSAFE,
+                                                    ZOO_PERSISTENT,
+                                                    pathBuffer.data(),
+                                                    100);
                 }
             }
             catch (const std::exception &e)
@@ -116,12 +116,33 @@ class Queue
             {
                 std::cout << "Unknown exception" << std::endl;
             }
-
-
         }
-
-
     }
+
+
+public:
+    // Add element to the queue
+    bool produce(int i)
+    {
+        std::array<int, 1> value = {i};
+        std::string elementName = name_ + "/element";
+        std::vector<char> pathBuffer(100);
+
+        auto retCreate = zoo_create(zkHandler,
+                                    elementName.c_str(),
+                                    reinterpret_cast<char*>(value.data()),
+                                    1,
+                                    &ZOO_OPEN_ACL_UNSAFE,
+                                    ZOO_PERSISTENT,
+                                    pathBuffer.data(),
+                                    100);
+
+        if (retCreate != ZOK)
+            return false;
+
+        return true;
+    }
+
 
 
 private:
