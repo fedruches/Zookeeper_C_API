@@ -20,7 +20,7 @@ public:
 
     void process(WatcherEvent event);
 
-private:
+public:
     std::string root;
     static std::mutex lock_mutex;
 };

@@ -6,13 +6,14 @@
 #include <memory>
 #include <vector>
 #include <array>
+#include <list>
 #include <zookeeper/zookeeper.h>
 
 #include "sync_primitive.h"
 
 void watcher(zhandle_t *zkH, int type, int state, const char *path, void *watcherCtx);
 
-class Queue
+class Queue : public SyncPrimitive
 {
 public:
     // Конструктор проверяет, существует ли корневой узел, и создаёт его, если тот отсутствует.
@@ -20,6 +21,8 @@ public:
 
     // Add element to the queue
     bool produce(int i);
+
+    int consume();
 
 private:
     std::string address_;

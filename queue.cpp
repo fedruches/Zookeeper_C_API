@@ -1,6 +1,7 @@
 #include "queue.h"
 
 Queue::Queue(const std::string &address, const std::string &name) :
+    SyncPrimitive(address),
     address_{address}, name_{name}
 {
     if (zkHandler != nullptr)
@@ -65,4 +66,21 @@ bool Queue::produce(int i)
         return false;
 
     return true;
+}
+
+int Queue::consume()
+{
+    int retValue = -1;
+    auto stat = std::make_unique<Stat>();
+
+    while(true)
+    {
+        std::lock_guard<std::mutex> lock(lock_mutex);
+        String_vector strings;
+
+        auto retGetChildren = zoo_get_children(zkHandler, root.c_str(), 1, &strings);
+
+
+
+    }
 }
