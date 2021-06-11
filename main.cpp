@@ -8,15 +8,12 @@
 #include <memory>
 #include <vector>
 
+#include "sync_primitive.h"
+#include "queue.h"
+
 // Keeping track of the connection state
 static int connected = 0;
 static int expired   = 0;
-
-// *zkHandler handles the connection with Zookeeper
-static zhandle_t *zkHandler;
-static std::mutex lock_mutex;
-
-std::string root;
 
 // watcher function would process events
 void watcher(zhandle_t *zkH, int type, int state, const char *path, void *watcherCtx)
@@ -43,129 +40,22 @@ void watcher(zhandle_t *zkH, int type, int state, const char *path, void *watche
     }
 }
 
-void SyncPrimitive(std::string address) {
-    if(zkHandler == nullptr)
-    {
-        try
-        {
-            std::cout << "Starting ZK:" << std::endl;
-            zkHandler = zookeeper_init("localhost:2181", watcher, 10000, 0, 0, 0);
-
-            std::cout << "Finished starting ZK: " << std::endl;
-        }
-        catch (const std::exception &e)
-        {
-            std::cout << e.what() << std::endl;
-            zkHandler = nullptr;
-        }
-        catch (...)
-        {
-            std::cout << "Unknown exception" << std::endl;
-        }
-    }
-}
-
-
-void process(WatcherEvent event)
+int main()
 {
-    std::lock_guard<std::mutex> lock(lock_mutex);
-}
+    //    zoo_set_debug_level(ZOO_LOG_LEVEL_DEBUG);
 
-class Queue
-{
-    Queue(const std::string &address, const std::string &name) :
-        address_{address}, name_{name}
-    {
-        if (zkHandler != nullptr)
-        {
-            try
-            {
-                auto retStat = std::make_unique<Stat>();
+    //    // zookeeper_init returns the handler upon a successful connection, null otherwise
+    //    zkHandler = zookeeper_init("localhost:2181", watcher, 10000, 0, 0, 0);
 
-                //checks the existence of a node in zookeeper synchronously
-                auto retExists = zoo_exists(zkHandler, name.c_str(), 0, retStat.get());
-                /* ZOK operation completed successfully
-                * ZNONODE the node does not exist.
-                * ZNOAUTH the client does not have permission.
-                * ZBADARGUMENTS - invalid input parameters
-                * ZINVALIDSTATE - zhandle state is either ZOO_SESSION_EXPIRED_STATE or ZOO_AUTH_FAILED_STATE
-                * ZMARSHALLINGERROR - failed to marshall a request; possibly, out of memory
-                * */
-                if (retExists == ZNONODE)
-                {
-                    std::vector<int> data = {0};
-                    std::vector<char> pathBuffer(100);
+    //    if (!zkHandler) {
+    //        std::cout << "Connection refused!" << std::endl;
+    //        return errno;
+    //    }else{
+    //        printf("Connection established with Zookeeper. \n");
+    //    }
 
-                    //const ACL_vector *openAclUnsafe = ZOO_OPEN_ACL_UNSAFE;
-
-                    /*auto retCreate = */zoo_create(zkHandler,
-                                                    name_.c_str(),
-                                                    reinterpret_cast<char*>(data.data()),
-                                                    1,
-                                                    &ZOO_OPEN_ACL_UNSAFE,
-                                                    ZOO_PERSISTENT,
-                                                    pathBuffer.data(),
-                                                    100);
-                }
-            }
-            catch (const std::exception &e)
-            {
-                std::cout << e.what() << std::endl;
-            }
-            catch (...)
-            {
-                std::cout << "Unknown exception" << std::endl;
-            }
-        }
-    }
-
-
-public:
-    // Add element to the queue
-    bool produce(int i)
-    {
-        std::array<int, 1> value = {i};
-        std::string elementName = name_ + "/element";
-        std::vector<char> pathBuffer(100);
-
-        auto retCreate = zoo_create(zkHandler,
-                                    elementName.c_str(),
-                                    reinterpret_cast<char*>(value.data()),
-                                    1,
-                                    &ZOO_OPEN_ACL_UNSAFE,
-                                    ZOO_PERSISTENT,
-                                    pathBuffer.data(),
-                                    100);
-
-        if (retCreate != ZOK)
-            return false;
-
-        return true;
-    }
-
-
-
-private:
-    std::string address_;
-    std::string name_;
-};
-
-
-int main(){
-    zoo_set_debug_level(ZOO_LOG_LEVEL_DEBUG);
-
-    // zookeeper_init returns the handler upon a successful connection, null otherwise
-    zkHandler = zookeeper_init("localhost:2181", watcher, 10000, 0, 0, 0);
-
-    if (!zkHandler) {
-        std::cout << "Connection refused!" << std::endl;
-        return errno;
-    }else{
-        printf("Connection established with Zookeeper. \n");
-    }
-
-    // Close Zookeeper connection
-    zookeeper_close(zkHandler);
+    //    // Close Zookeeper connection
+    //    zookeeper_close(zkHandler);
 
     return 0;
 }
