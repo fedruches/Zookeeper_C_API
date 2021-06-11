@@ -79,7 +79,16 @@ int Queue::consume()
         String_vector strings;
 
         auto retGetChildren = zoo_get_children(zkHandler, root.c_str(), 1, &strings);
+        if (strings.count == 0)
+        {
+            std::cout << "Going to wait" << std::endl;
+        }
+        else
+        {
 
+
+
+        }
 
 
     }
