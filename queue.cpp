@@ -79,6 +79,12 @@ int Queue::consume()
         String_vector strings;
 
         auto retGetChildren = zoo_get_children(zkHandler, root.c_str(), 1, &strings);
+        if (retGetChildren != ZOK)
+        {
+            std::cout << "zoo_get_children error" << std::endl;
+            return -1;
+        }
+
         if (strings.count == 0)
         {
             std::cout << "Going to wait" << std::endl;
@@ -90,11 +96,41 @@ int Queue::consume()
             // нужно решить, какой элемент является наименьшим.
             // Для этого осуществляется проход по списку и из него удаляется префикс "element" для каждого узла.
 
-            //Integer min = new Integer(list.get(0).substring(7));
             std::string minNode = strings.data[0];
-            for (int i = 0; i < strings.count; ++i)
-                //Integer tempValue = new Integer(s.substring(7));
+            int min = std::stoi(minNode.substr(7));
 
+            for (int i = 0; i < strings.count; ++i)
+            {
+                std::string tempNode = strings.data[i];
+                int tempValue = std::stoi(tempNode.substr(7));
+                std::cout << "Temporary value: " + std::to_string(tempValue)<< std::endl;
+                if(tempValue < min)
+                {
+                    min = tempValue;
+                    minNode = tempNode;
+                }
+            }
+            std::cout << "Temporary value: " + root + "/" + minNode << std::endl;
+            std::string rootPlusMinNode = root + "/" + minNode;
+
+            std::vector<char> pathBuffer(100);
+            int bufferSize = 100;
+            auto retGetNode = zoo_get(zkHandler, rootPlusMinNode.c_str(), 0, pathBuffer.data(), &bufferSize, stat.get());
+
+            if (retGetNode != ZOK)
+            {
+                std::cout << "zoo_get error" << std::endl;
+                return -1;
+            }
+
+            int retDeleteNode = zoo_delete(zkHandler, rootPlusMinNode.c_str(), 0);
+            if (retDeleteNode != ZOK)
+            {
+                std::cout << "zoo_delete error" << std::endl;
+                return -1;
+            }
+
+            return stat->czxid;
         }
     }
 }
