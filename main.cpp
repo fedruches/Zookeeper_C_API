@@ -40,22 +40,51 @@ void watcher(zhandle_t *zkH, int type, int state, const char *path, void *watche
     }
 }
 
+// java SyncPrimitive qTest localhost 100 c
+void QueueTest()
+{
+    Queue q("localhost:2181", "/app1");
+    int max = 100;
+
+    // produce
+    for (int i = 0; i < max; ++i)
+    {
+        try
+        {
+            q.produce(i + 10);
+        }
+        catch (const std::exception &e)
+        {
+            std::cout << e.what() << std::endl;
+        }
+        catch (...)
+        {
+            std::cout << "Unkonwn exception" << std::endl;
+        }
+    }
+
+    // consume
+    for (int i = 0; i < max; ++i)
+    {
+        try
+        {
+            int c = q.consume();
+            std::cout << "Item: " << c << std::endl;
+        }
+        catch (const std::exception &e)
+        {
+            i--;
+            std::cout << e.what() << std::endl;
+        }
+        catch (...)
+        {
+            std::cout << "Unkonwn exception" << std::endl;
+        }
+    }
+}
+
 int main()
 {
-    //    zoo_set_debug_level(ZOO_LOG_LEVEL_DEBUG);
-
-    //    // zookeeper_init returns the handler upon a successful connection, null otherwise
-    //    zkHandler = zookeeper_init("localhost:2181", watcher, 10000, 0, 0, 0);
-
-    //    if (!zkHandler) {
-    //        std::cout << "Connection refused!" << std::endl;
-    //        return errno;
-    //    }else{
-    //        printf("Connection established with Zookeeper. \n");
-    //    }
-
-    //    // Close Zookeeper connection
-    //    zookeeper_close(zkHandler);
-
+    QueueTest();
     return 0;
 }
