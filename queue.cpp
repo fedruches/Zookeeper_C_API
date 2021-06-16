@@ -8,11 +8,11 @@ Queue::Queue(const std::string &address, const std::string &name) :
     {
         try
         {
-            auto retStat = std::make_unique<Stat>();
-            retStat = nullptr;
+            //auto retStat = std::make_unique<Stat>();
+            Stat *retStat = nullptr;
 
             //checks the existence of a node in zookeeper synchronously
-            /*auto retExists = */zoo_exists(zkHandler, name_.c_str(), 0, retStat.get());
+            /*auto retExists = */zoo_exists(zkHandler, name_.c_str(), 0, retStat);
             /* ZOK operation completed successfully
             * ZNONODE the node does not exist.
             * ZNOAUTH the client does not have permission.
@@ -29,13 +29,13 @@ Queue::Queue(const std::string &address, const std::string &name) :
                 //const ACL_vector *openAclUnsafe = ZOO_OPEN_ACL_UNSAFE;
 
                 auto retCreate = zoo_create(zkHandler,
-                                                name_.c_str(),
-                                                reinterpret_cast<char*>(data.data()),
-                                                1,
-                                                &ZOO_OPEN_ACL_UNSAFE,
-                                                ZOO_PERSISTENT,
-                                                pathBuffer.data(),
-                                                100);
+                                            name_.c_str(),
+                                            reinterpret_cast<char*>(data.data()),
+                                            1,
+                                            &ZOO_OPEN_ACL_UNSAFE,
+                                            ZOO_PERSISTENT,
+                                            pathBuffer.data(),
+                                            100);
 
                 if (retCreate != ZOK)
                     std::cout << "zoo_create error" << std::endl;
