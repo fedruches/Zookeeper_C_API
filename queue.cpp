@@ -9,9 +9,10 @@ Queue::Queue(const std::string &address, const std::string &name) :
         try
         {
             auto retStat = std::make_unique<Stat>();
+            retStat = nullptr;
 
             //checks the existence of a node in zookeeper synchronously
-            auto retExists = zoo_exists(zkHandler, name.c_str(), 0, retStat.get());
+            /*auto retExists = */zoo_exists(zkHandler, name_.c_str(), 0, retStat.get());
             /* ZOK operation completed successfully
             * ZNONODE the node does not exist.
             * ZNOAUTH the client does not have permission.
@@ -19,14 +20,15 @@ Queue::Queue(const std::string &address, const std::string &name) :
             * ZINVALIDSTATE - zhandle state is either ZOO_SESSION_EXPIRED_STATE or ZOO_AUTH_FAILED_STATE
             * ZMARSHALLINGERROR - failed to marshall a request; possibly, out of memory
             * */
-            if (retExists == ZNONODE)
+
+            if (retStat == nullptr)
             {
                 std::vector<int> data = {0};
                 std::vector<char> pathBuffer(100);
 
                 //const ACL_vector *openAclUnsafe = ZOO_OPEN_ACL_UNSAFE;
 
-                /*auto retCreate = */zoo_create(zkHandler,
+                auto retCreate = zoo_create(zkHandler,
                                                 name_.c_str(),
                                                 reinterpret_cast<char*>(data.data()),
                                                 1,
@@ -34,7 +36,11 @@ Queue::Queue(const std::string &address, const std::string &name) :
                                                 ZOO_PERSISTENT,
                                                 pathBuffer.data(),
                                                 100);
+
+                if (retCreate != ZOK)
+                    std::cout << "zoo_create error" << std::endl;
             }
+            std::cout << "Queue constructor" << std::endl;
         }
         catch (const std::exception &e)
         {
@@ -61,6 +67,8 @@ bool Queue::produce(int i)
                                 ZOO_PERSISTENT,
                                 pathBuffer.data(),
                                 100);
+
+    std::cout << "retCreate: " << retCreate << std::endl;
 
     if (retCreate != ZOK)
         return false;

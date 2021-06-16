@@ -2,6 +2,9 @@
 #define SYNCPRIMITIVE_H
 #pragma once
 
+#include <errno.h>
+#include <string.h>
+
 #include <iostream>
 #include <mutex>
 #include <zookeeper/zookeeper.h>
