@@ -38,6 +38,7 @@ void watcher(zhandle_t *zkH, int type, int state, const char *path, void *watche
             zookeeper_close(zkH);
         }
     }
+    std::cout << "Watcher" << std::endl;
 }
 
 // java SyncPrimitive qTest localhost 100 c

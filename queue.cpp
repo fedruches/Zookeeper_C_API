@@ -78,7 +78,7 @@ int Queue::consume()
         std::lock_guard<std::mutex> lock(lock_mutex);
         String_vector strings;
 
-        auto retGetChildren = zoo_get_children(zkHandler, root.c_str(), 1, &strings);
+        auto retGetChildren = zoo_get_children(zkHandler, name_.c_str(), 1, &strings);
         if (retGetChildren != ZOK)
         {
             std::cout << "zoo_get_children error" << std::endl;
@@ -110,8 +110,8 @@ int Queue::consume()
                     minNode = tempNode;
                 }
             }
-            std::cout << "Temporary value: " + root + "/" + minNode << std::endl;
-            std::string rootPlusMinNode = root + "/" + minNode;
+            std::cout << "Temporary value: " + name_ + "/" + minNode << std::endl;
+            std::string rootPlusMinNode = name_ + "/" + minNode;
 
             std::vector<char> pathBuffer(100);
             int bufferSize = 100;

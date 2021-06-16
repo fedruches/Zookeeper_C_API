@@ -6,9 +6,6 @@
 #include <mutex>
 #include <zookeeper/zookeeper.h>
 
-// *zkHandler handles the connection with Zookeeper
-static zhandle_t *zkHandler;
-
 void watcher(zhandle_t *zkH, int type, int state, const char *path, void *watcherCtx);
 
 // Конструктор этого класса проверяет, существует ли обработчик для ZooKeeper, и,
@@ -23,6 +20,9 @@ public:
 public:
     std::string root;
     static std::mutex lock_mutex;
+
+    // *zkHandler handles the connection with Zookeeper
+    zhandle_t *zkHandler = nullptr;
 };
 
 #endif // SYNCPRIMITIVE_H
