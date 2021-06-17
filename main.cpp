@@ -45,7 +45,7 @@ void watcher(zhandle_t *zkH, int type, int state, const char *path, void *watche
 void QueueTest()
 {
     Queue q("localhost:2181", "/app1");
-    int max = 100;
+    int max = 2;
 
     // produce
     for (int i = 0; i < max; ++i)

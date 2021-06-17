@@ -55,16 +55,17 @@ Queue::Queue(const std::string &address, const std::string &name) :
 
 bool Queue::produce(int i)
 {
-    std::array<int, 1> value = {i};
     std::string elementName = name_ + "/element";
     std::vector<char> pathBuffer(100);
+    int value = i;
+    auto byteArray = std::to_string(value);
 
     auto retCreate = zoo_create(zkHandler,
                                 elementName.c_str(),
-                                reinterpret_cast<char*>(value.data()),
-                                1,
+                                byteArray.c_str(),
+                                byteArray.size(),
                                 &ZOO_OPEN_ACL_UNSAFE,
-                                ZOO_PERSISTENT,
+                                ZOO_PERSISTENT_SEQUENTIAL,
                                 pathBuffer.data(),
                                 100);
 
@@ -105,6 +106,8 @@ int Queue::consume()
             // Для этого осуществляется проход по списку и из него удаляется префикс "element" для каждого узла.
 
             std::string minNode = strings.data[0];
+            std::cout << minNode << std::endl;
+
             int min = std::stoi(minNode.substr(7));
 
             for (int i = 0; i < strings.count; ++i)
