@@ -124,15 +124,17 @@ int Queue::consume()
             std::cout << "Temporary value: " + name_ + "/" + minNode << std::endl;
             std::string rootPlusMinNode = name_ + "/" + minNode;
 
-            std::vector<char> pathBuffer(100);
+            std::vector<char> buffer(100);
             int bufferSize = 100;
-            auto retGetNode = zoo_get(zkHandler, rootPlusMinNode.c_str(), 0, pathBuffer.data(), &bufferSize, stat.get());
+            auto retGetNode = zoo_get(zkHandler, rootPlusMinNode.c_str(), 0, buffer.data(), &bufferSize, stat.get());
 
             if (retGetNode != ZOK)
             {
                 std::cout << "zoo_get error" << std::endl;
                 return -1;
             }
+
+            std::cout << std::atoi(buffer.data()) << std::endl;
 
             int retDeleteNode = zoo_delete(zkHandler, rootPlusMinNode.c_str(), 0);
             if (retDeleteNode != ZOK)
@@ -141,7 +143,7 @@ int Queue::consume()
                 return -1;
             }
 
-            return stat->czxid;
+            return std::atoi(buffer.data());
         }
     }
 }
