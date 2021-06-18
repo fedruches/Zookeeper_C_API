@@ -45,14 +45,17 @@ void watcher(zhandle_t *zkH, int type, int state, const char *path, void *watche
 void QueueTest()
 {
     Queue q("localhost:2181", "/app1");
-    int max = 2;
+    int max = 400;
+
+    //    while (true)
+    //    {
 
     // produce
     for (int i = 0; i < max; ++i)
     {
         try
         {
-            q.produce(i + 10);
+            q.produce(SuffixGenerator::i);
         }
         catch (const std::exception &e)
         {
@@ -64,7 +67,7 @@ void QueueTest()
         }
     }
 
-    // consume
+    //        // consume
     for (int i = 0; i < max; ++i)
     {
         try
@@ -82,6 +85,7 @@ void QueueTest()
             std::cout << "Unkonwn exception" << std::endl;
         }
     }
+    //}
 }
 
 int main()

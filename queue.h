@@ -8,10 +8,12 @@
 #include <array>
 #include <charconv>
 #include <list>
+#include <fstream>
 
 #include <zookeeper/zookeeper.h>
 
 #include "sync_primitive.h"
+#include "suffix_generator.hpp"
 
 void watcher(zhandle_t *zkH, int type, int state, const char *path, void *watcherCtx);
 
@@ -27,6 +29,8 @@ public:
     int consume();
 
 private:
+    std::ofstream prodFile_;
+    std::ofstream consFile_;
     std::string address_;
     std::string name_;
 };

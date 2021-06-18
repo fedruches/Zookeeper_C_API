@@ -1,9 +1,15 @@
 #include "queue.h"
 
+int SuffixGenerator::i = -1;
+int SuffixGenerator::j = 0;
+
 Queue::Queue(const std::string &address, const std::string &name) :
     SyncPrimitive(address),
     address_{address}, name_{name}
 {
+    prodFile_.open("/home/fedor/zookeeper_queue/test_data/prod_file.txt");
+    consFile_.open("/home/fedor/zookeeper_queue/test_data/cons_file.txt");
+
     if (zkHandler != nullptr)
     {
         try
@@ -55,17 +61,17 @@ Queue::Queue(const std::string &address, const std::string &name) :
 
 bool Queue::produce(int i)
 {
-    std::string elementName = name_ + "/element";
+    std::string elementName = name_ + "/element" + SuffixGenerator::GetNext();
     std::vector<char> pathBuffer(100);
-    int value = i;
-    auto byteArray = std::to_string(value);
+
+    auto byteArray = std::to_string(SuffixGenerator::j);
 
     auto retCreate = zoo_create(zkHandler,
                                 elementName.c_str(),
                                 byteArray.c_str(),
                                 byteArray.size(),
                                 &ZOO_OPEN_ACL_UNSAFE,
-                                ZOO_PERSISTENT_SEQUENTIAL,
+                                ZOO_PERSISTENT,
                                 pathBuffer.data(),
                                 100);
 
@@ -73,6 +79,8 @@ bool Queue::produce(int i)
 
     if (retCreate != ZOK)
         return false;
+
+    prodFile_ << SuffixGenerator::j << std::endl;
 
     return true;
 }
@@ -105,6 +113,11 @@ int Queue::consume()
             // нужно решить, какой элемент является наименьшим.
             // Для этого осуществляется проход по списку и из него удаляется префикс "element" для каждого узла.
 
+            // Писатель добавляет 00, 01, 02, 03, 04, 05, ... 05, 95, 96, 97, 98, 99, -98, -97, -96, ..., -5, -4, -3, -2, -1, 0.
+            // Писатель пишет в файл число, которое он добавляет
+            // Читатель пишет в другой файл число, которое он получает
+            // Файлы должны совпадать
+
             std::string minNode = strings.data[0];
             std::cout << minNode << std::endl;
 
@@ -115,6 +128,7 @@ int Queue::consume()
                 std::string tempNode = strings.data[i];
                 int tempValue = std::stoi(tempNode.substr(7));
                 std::cout << "Temporary value: " + std::to_string(tempValue)<< std::endl;
+
                 if(tempValue < min)
                 {
                     min = tempValue;
@@ -123,6 +137,9 @@ int Queue::consume()
             }
             std::cout << "Temporary value: " + name_ + "/" + minNode << std::endl;
             std::string rootPlusMinNode = name_ + "/" + minNode;
+
+            // Проверить, что minNode является нулевым эдементом в векторе
+            // Переход через максимальное значение счётчика
 
             std::vector<char> buffer(100);
             int bufferSize = 100;
@@ -142,6 +159,8 @@ int Queue::consume()
                 std::cout << "zoo_delete error" << std::endl;
                 return -1;
             }
+
+            consFile_ << std::atoi(buffer.data()) << std::endl;
 
             return std::atoi(buffer.data());
         }
