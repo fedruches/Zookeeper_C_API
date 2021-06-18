@@ -45,47 +45,48 @@ void watcher(zhandle_t *zkH, int type, int state, const char *path, void *watche
 void QueueTest()
 {
     Queue q("localhost:2181", "/app1");
-    int max = 400;
+    int max = 10;
 
-    //    while (true)
-    //    {
-
-    // produce
-    for (int i = 0; i < max; ++i)
+    while (true)
     {
-        try
+        // produce
+        for (int i = 0; i < max; ++i)
         {
-            q.produce(SuffixGenerator::i);
+            try
+            {
+                q.produce(SuffixGenerator::i);
+            }
+            catch (const std::exception &e)
+            {
+                std::cout << e.what() << std::endl;
+            }
+            catch (...)
+            {
+                std::cout << "Unkonwn exception" << std::endl;
+            }
         }
-        catch (const std::exception &e)
-        {
-            std::cout << e.what() << std::endl;
-        }
-        catch (...)
-        {
-            std::cout << "Unkonwn exception" << std::endl;
-        }
-    }
+        q.PrintProdDelimeter();
 
-    //        // consume
-    for (int i = 0; i < max; ++i)
-    {
-        try
+        // consume
+        for (int i = 0; i < max; ++i)
         {
-            int c = q.consume();
-            std::cout << "Item: " << c << std::endl;
+            try
+            {
+                int c = q.consume();
+                std::cout << "Item: " << c << std::endl;
+            }
+            catch (const std::exception &e)
+            {
+                i--;
+                std::cout << e.what() << std::endl;
+            }
+            catch (...)
+            {
+                std::cout << "Unkonwn exception" << std::endl;
+            }
         }
-        catch (const std::exception &e)
-        {
-            i--;
-            std::cout << e.what() << std::endl;
-        }
-        catch (...)
-        {
-            std::cout << "Unkonwn exception" << std::endl;
-        }
+        q.PrintConsDelimeter();
     }
-    //}
 }
 
 int main()

@@ -77,10 +77,10 @@ bool Queue::produce(int i)
 
     std::cout << "retCreate: " << retCreate << std::endl;
 
+    prodFile_ << SuffixGenerator::j << std::endl;
+
     if (retCreate != ZOK)
         return false;
-
-    prodFile_ << SuffixGenerator::j << std::endl;
 
     return true;
 }
@@ -165,4 +165,14 @@ int Queue::consume()
             return std::atoi(buffer.data());
         }
     }
+}
+
+void Queue::PrintProdDelimeter()
+{
+    prodFile_ << std::endl;
+}
+
+void Queue::PrintConsDelimeter()
+{
+    consFile_ << std::endl;
 }

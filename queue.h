@@ -28,6 +28,9 @@ public:
 
     int consume();
 
+    void PrintProdDelimeter();
+    void PrintConsDelimeter();
+
 private:
     std::ofstream prodFile_;
     std::ofstream consFile_;

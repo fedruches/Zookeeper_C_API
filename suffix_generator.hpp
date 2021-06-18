@@ -15,7 +15,10 @@ public:
             i = - 99;
 
         j = i;
-        return (std::abs(i) < 10 ? "0" : "") + std::to_string(i);
+        if (std::abs(i) < 10 && i < 0)
+            return (std::abs(i) < 10 ? "-0" : "") + std::to_string(std::abs(i));
+        else
+            return (std::abs(i) < 10 ? "0" : "") + std::to_string(i);
     }
 
 public:
