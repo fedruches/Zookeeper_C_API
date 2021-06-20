@@ -5,14 +5,16 @@
 #include <cmath>
 #include <string>
 
+const int maxCountValue = 99;
+
 class SuffixGenerator
 {
 public:
     static std::string GetNext()
     {
         i++;
-        if (i == 100)
-            i = - 99;
+        if (i == maxCountValue + 1)
+            i = - maxCountValue;
 
         j = i;
         if (std::abs(i) < 10 && i < 0)

@@ -123,20 +123,46 @@ int Queue::consume()
 
             int min = std::stoi(minNode.substr(7));
 
+            std::vector<std::string> tempStrVec(strings.count);
             for (int i = 0; i < strings.count; ++i)
-            {
-                std::string tempNode = strings.data[i];
-                int tempValue = std::stoi(tempNode.substr(7));
-                std::cout << "Temporary value: " + std::to_string(tempValue)<< std::endl;
+                tempStrVec[i] = strings.data[i];
 
-                if(tempValue < min)
+            // Найдем, есть ли в массиве потомков два элемента (99 и -99), при наличии которых происходит изменение порядка сортировки
+            auto numberOfMaxVals = std::count_if(tempStrVec.begin(), tempStrVec.end(),
+                                                 [](auto str){ return std::abs(std::stoi(str.substr(7))) == maxCountValue; });
+
+            bool isMaxValPass = (numberOfMaxVals == 2);
+
+            std::vector<std::string> positiveVector;
+            auto minElemIt = positiveVector.begin();
+            if (isMaxValPass)
+            {
+                std::copy_if(tempStrVec.begin(), tempStrVec.end(),
+                             std::back_inserter(positiveVector),
+                             [](auto str){ return std::stoi(str.substr(7)) > 0; });
+
+                minElemIt = std::min_element(positiveVector.begin(), positiveVector.end(),
+                                            [](auto str1, auto str2){ return std::stoi(str1.substr(7)) < std::stoi(str2.substr(7)); });
+
+                std::cout << "JUMP" << std::endl;
+            }
+            else
+            {
+                for (int i = 0; i < strings.count; ++i)
                 {
-                    min = tempValue;
-                    minNode = tempNode;
+                    std::string tempNode = strings.data[i];
+                    int tempValue = std::stoi(tempNode.substr(7));
+
+                    if(tempValue < min)
+                    {
+                        min = tempValue;
+                        minNode = tempNode;
+                    }
                 }
             }
-            std::cout << "Temporary value: " + name_ + "/" + minNode << std::endl;
-            std::string rootPlusMinNode = name_ + "/" + minNode;
+
+            std::string rootPlusMinNode = name_ + "/" + (positiveVector.empty() ? minNode : *minElemIt);
+            std::cout << "Temporary value: " + rootPlusMinNode << std::endl;
 
             // Проверить, что minNode является нулевым эдементом в векторе
             // Переход через максимальное значение счётчика

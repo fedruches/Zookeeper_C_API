@@ -9,6 +9,7 @@
 #include <charconv>
 #include <list>
 #include <fstream>
+#include <algorithm>
 
 #include <zookeeper/zookeeper.h>
 
